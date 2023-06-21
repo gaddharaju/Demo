@@ -25,7 +25,7 @@ resource "azurerm_resource_group" "example" {
 }
 
 # Create a virtual network
-resource "azurerm_virtual_network" "example" {
+resource "azurerm_virtual_network" "example1" {
   name                = "example-vnet"
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.example.location
@@ -33,15 +33,15 @@ resource "azurerm_virtual_network" "example" {
 }
 
 # Create a subnet
-resource "azurerm_subnet" "example" {
+resource "azurerm_subnet" "example11" {
   name                 = "example-subnet"
   resource_group_name  = azurerm_resource_group.example.name
-  virtual_network_name = azurerm_virtual_network.example.name
+  virtual_network_name = azurerm_virtual_network.example1.name
   address_prefixes     = ["10.0.1.0/24"]
 }
 
 # Create a public IP address
-resource "azurerm_public_ip" "example" {
+resource "azurerm_public_ip" "example111" {
   name                = "example-public-ip"
   location            = azurerm_resource_group.example.location
   resource_group_name = azurerm_resource_group.example.name
@@ -49,7 +49,7 @@ resource "azurerm_public_ip" "example" {
 }
 
 # Create a network security group
-resource "azurerm_network_security_group" "example" {
+resource "azurerm_network_security_group" "example1111" {
   name                = "example-nsg"
   location            = azurerm_resource_group.example.location
   resource_group_name = azurerm_resource_group.example.name
@@ -67,20 +67,20 @@ resource "azurerm_network_security_rule" "http" {
   source_address_prefix       = "*"
   destination_address_prefix  = "*"
   resource_group_name         = azurerm_resource_group.example.name
-  network_security_group_name = azurerm_network_security_group.example.name
+  network_security_group_name = azurerm_network_security_group.example1111.name
 }
 
 # Create a network interface
-resource "azurerm_network_interface" "example" {
+resource "azurerm_network_interface" "ni" {
   name                = "example-nic"
   location            = azurerm_resource_group.example.location
   resource_group_name = azurerm_resource_group.example.name
 
   ip_configuration {
     name                          = "example-ipconfig"
-    subnet_id                     = azurerm_subnet.example.id
+    subnet_id                     = azurerm_subnet.example11.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.example.id
+    public_ip_address_id          = azurerm_public_ip.example111.id
   }
 }
 
@@ -90,7 +90,7 @@ resource "azurerm_virtual_machine" "example" {
   location              = azurerm_resource_group.example.location
   resource_group_name   = azurerm_resource_group.example.name
   vm_size               = "Standard_DS2_v2"
-  network_interface_ids = [azurerm_network_interface.example.id]
+  network_interface_ids = [azurerm_network_interface.ni.id]
 
   storage_image_reference {
     publisher = "Canonical"
