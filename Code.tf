@@ -193,7 +193,7 @@ adoid= var.ADO_Service_Account_ObjectId
 }
 }
 
-resource "azurerm_key_vault_access_policy" "koushikPolicy" {
+resource "azurerm_key_vault_access_policy" "babuPolicy" {
 for_each= local.objectIds
 key_vault_id= azurerm_key_vault.myvault.id
 tenant_id= data.azurerm_client_config.current.tenant_id
@@ -209,5 +209,5 @@ resource "azurerm_key_vault_secret" "passwordsecret" {
   name         = var.secretkeys
   value        = random_password.password.result 
   key_vault_id = azurerm_key_vault.myvault.id
-depends_on=[azurerm_key_vault_access_policy.koushikPolicy]
+depends_on=[azurerm_key_vault_access_policy.babuPolicy]
 }

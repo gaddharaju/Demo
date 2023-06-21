@@ -2,7 +2,7 @@ variable "RgName" {
 
   type        = string
   description = "name of the resource"
-  default     = "koushikRG"
+  default     = "BabuRG"
 }
 
 variable "RGlocation" {
@@ -13,7 +13,7 @@ variable "RGlocation" {
 variable "vnetName" {
   type        = string
   description = "name of the resource "
-  default     = "koushik-network"
+  default     = "babu-network"
 }
 variable "vnetAddress" {
   type        = list(string)
@@ -28,12 +28,12 @@ variable "subnet_address_prefixes" {
 
 variable "subnetnames" {
   type    = list(string)
-  default = ["koushiksubnet1", "koushiksubnet2", "AzureBastionSubnet"]
+  default = ["babusubnet1", "babusubnet2", "AzureBastionSubnet"]
 }
 
 variable "nicnames" {
   type    = list(string)
-  default = ["koushiknic1", "koushiknic2"]
+  default = ["babunic1", "babunic2"]
 }
 
 variable "privateaddresses" {
@@ -43,11 +43,11 @@ variable "privateaddresses" {
 
 variable "pubip" {
   type    = string
-  default = "koushikpublicip"
+  default = "babupublicip"
 }
 variable "basthost" {
   type    = string
-  default = "koushikbastion"
+  default = "babubastion"
 }
 
 variable "vm_os" {
@@ -58,12 +58,12 @@ variable "vm_os" {
 
 variable "vmnames" {
   type    = list(string)
-  default = ["koushikvm1", "koushikvm2"]
+  default = ["babuvm1", "babuvm2"]
 }
 
 variable "vmunames" {
   type    = list(string)
-  default = ["koushik", "koushikdp"]
+  default = ["babu", "babudp"]
 }
 
 
@@ -74,7 +74,7 @@ variable "ipconfignames" {
 }
 variable "storage" {
   type    = string
-  default = "koushikstorageaccount123"
+  default = "babustorageaccount123"
 
 }
 
@@ -121,19 +121,19 @@ variable "centos_sku" {
 
 variable "container"{
 type=string
-default="koushik-container"
+default="babu-container"
 
 }
 
 variable "keyvaults"{
 type= string
-default="koushik-vaultf"
+default="babu-vaultf"
 
 }
 
 variable "secretkeys" {
 type=string
-default="koushik-secret"
+default="babu-secret"
 }
 
 
