@@ -19,108 +19,87 @@ provider "azurerm" {
 }
 
 # Create a resource group
-resource "azurerm_resource_group" "example" {
-  name     = "example-resource-group"
-  location = "West Europe"
+resource "azurerm_resource_group" "example1" {
+  name     = "resource-group"      # Specify the name of the resource group
+  location = "West US"                     # Set the location for the resource group
 }
 
 # Create a virtual network
-resource "azurerm_virtual_network" "example1" {
-  name                = "example-vnet"
-  address_space       = ["10.0.0.0/16"]
+resource "azurerm_virtual_network" "example2" {
+  name                = "example-vnet"                     # Specify the name of the virtual network
+  address_space       = ["10.0.0.0/16"]                    # Define the IP address range for the VNet
   location            = azurerm_resource_group.example.location
   resource_group_name = azurerm_resource_group.example.name
 }
 
-# Create a subnet
-resource "azurerm_subnet" "example11" {
-  name                 = "example-subnet"
-  resource_group_name  = azurerm_resource_group.example.name
-  virtual_network_name = azurerm_virtual_network.example1.name
-  address_prefixes     = ["10.0.1.0/24"]
+# Create a subnet within the virtual network
+resource "azurerm_subnet" "example3" {
+  name                 = "example-subnet"                  # Specify the name of the subnet
+  resource_group_name  = azurerm_resource_group.example1.name
+  virtual_network_name = azurerm_virtual_network.example2.name
+  address_prefixes     = ["10.0.1.0/24"]                   # Define the IP address range for the subnet
 }
 
 # Create a public IP address
-resource "azurerm_public_ip" "example111" {
-  name                = "example-public-ip"
+resource "azurerm_public_ip" "example3" {
+  name                = "example-public-ip"                # Specify the name of the public IP
   location            = azurerm_resource_group.example.location
-  resource_group_name = azurerm_resource_group.example.name
-  allocation_method   = "Static"
-}
+  resource_group_name = azurerm_resource_group.example1.name
+  allocation_method   = "Static"                           # Choose between "Static" or "Dynamic" allocation
 
-# Create a network security group
-resource "azurerm_network_security_group" "example1111" {
-  name                = "example-nsg"
-  location            = azurerm_resource_group.example.location
-  resource_group_name = azurerm_resource_group.example.name
-}
-
-# Allow inbound HTTP traffic on port 80
-resource "azurerm_network_security_rule" "http" {
-  name                        = "allow-http"
-  priority                    = 100
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "80"
-  source_address_prefix       = "*"
-  destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.example.name
-  network_security_group_name = azurerm_network_security_group.example1111.name
-}
-
-# Create a network interface
-resource "azurerm_network_interface" "ni" {
-  name                = "example-nic"
-  location            = azurerm_resource_group.example.location
-  resource_group_name = azurerm_resource_group.example.name
-
-  ip_configuration {
-    name                          = "example-ipconfig"
-    subnet_id                     = azurerm_subnet.example11.id
-    private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.example111.id
+  tags = {
+    environment = "dev"
   }
 }
 
-# Create a virtual machine
+# Create a network interface and associate it with the subnet and public IP
+resource "azurerm_network_interface" "example4" {
+  name                = "example-nic"                      # Specify the name of the network interface
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example1.name
+
+  ip_configuration {
+    name                          = "example-ipconfig"      # Specify the name of the IP configuration
+    subnet_id                     = azurerm_subnet.example.id
+    private_ip_address_allocation = "Dynamic"              # Allocate IP address dynamically
+    public_ip_address_id          = azurerm_public_ip.example.id
+  }
+}
+
+# Create a virtual machine and associate it with the network interface
 resource "azurerm_virtual_machine" "example" {
-  name                  = "example-vm"
+  name                  = "example-vm"                      # Specify the name of the virtual machine
   location              = azurerm_resource_group.example.location
   resource_group_name   = azurerm_resource_group.example.name
-  vm_size               = "Standard_DS2_v2"
-  network_interface_ids = [azurerm_network_interface.ni.id]
+  network_interface_ids = [azurerm_network_interface.example.id]
+  vm_size               = "Standard_DS1_v2"                 # Specify the size of the virtual machine
 
   storage_image_reference {
     publisher = "Canonical"
     offer     = "UbuntuServer"
-    sku       = "18.04-LTS"
+    sku       = "16.04-LTS"
     version   = "latest"
   }
 
   storage_os_disk {
-    name              = "example-osdisk"
+    name              = "example-osdisk"                    # Specify the name of the OS disk
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
   }
 
   os_profile {
-    computer_name  = "example-vm"
-    admin_username = "adminuser"
-    admin_password = "AdminPassword1234!"
+    computer_name  = "examplevm"                            # Specify the computer name of the VM
+    admin_username = "adminuser"                            # Set the admin username for the VM
+    admin_password = "Password1234!"                        # Set the admin password for the VM
   }
 
   os_profile_linux_config {
     disable_password_authentication = false
   }
+}
 
-  provisioner "remote-exec" {
-    inline = [
-      "sudo apt update",
-      "sudo apt install apache2 -y",
-      "sudo sh -c 'echo \"Hello, World!\" > /var/www/html/index.html'"
-    ]
-  }
+# Output the public IP address for accessing the VM
+output "public_ip_address" {
+  value = azurerm_public_ip.example.ip_address
 }
