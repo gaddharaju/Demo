@@ -5,13 +5,13 @@ terraform {
       version = "=3.51.0"
     }
   }
+}
 
 terraform {
 
   backend "azurerm" {
   } 
 } 
-}
 
 # Configure the Azure provider
 provider "azurerm" {
