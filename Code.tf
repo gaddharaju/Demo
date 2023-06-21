@@ -9,36 +9,6 @@ resource "azurerm_resource_group" "app_rg" {
   location = "West US"                   # Set the location for the resource group
 }
 
-# Create a public IP address
-resource "azurerm_public_ip" "app_public_ip" {
-  name                = "myapp-public-ip"    # Specify the name of the public IP
-  location            = azurerm_resource_group.app_rg.location
-  resource_group_name = azurerm_resource_group.app_rg.name
-  allocation_method   = "Static"             # Choose between "Static" or "Dynamic" allocation
-}
-
-# Create a network security group
-resource "azurerm_network_security_group" "app_nsg" {
-  name                = "myapp-nsg"           # Specify the name of the NSG
-  location            = azurerm_resource_group.app_rg.location
-  resource_group_name = azurerm_resource_group.app_rg.name
-}
-
-# Create an inbound security rule to allow HTTP traffic
-resource "azurerm_network_security_rule" "http_rule" {
-  name                        = "http-rule"            # Specify the name of the rule
-  priority                    = 100
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "80"
-  source_address_prefix       = "*"
-  destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.app_rg.name
-  network_security_group_name = azurerm_network_security_group.app_nsg.name
-}
-
 # Create a virtual network
 resource "azurerm_virtual_network" "app_vnet" {
   name                = "myapp-vnet"                 # Specify the name of the virtual network
@@ -55,7 +25,7 @@ resource "azurerm_subnet" "app_subnet" {
   address_prefixes     = ["10.0.1.0/24"]             # Define the IP address range for the subnet
 }
 
-# Create a network interface and associate it with the subnet and NSG
+# Create a network interface and associate it with the subnet
 resource "azurerm_network_interface" "app_nic" {
   name                = "myapp-nic"                  # Specify the name of the network interface
   location            = azurerm_resource_group.app_rg.location
@@ -65,10 +35,7 @@ resource "azurerm_network_interface" "app_nic" {
     name                          = "myapp-ipconfig"  # Specify the name of the IP configuration
     subnet_id                     = azurerm_subnet.app_subnet.id
     private_ip_address_allocation = "Dynamic"        # Allocate IP address dynamically
-    public_ip_address_id          = azurerm_public_ip.app_public_ip.id
   }
-
-  network_security_group_id = azurerm_network_security_group.app_nsg.id
 }
 
 # Create a virtual machine and associate it with the network interface
@@ -101,15 +68,13 @@ resource "azurerm_virtual_machine" "app_vm" {
 
   provisioner "remote-exec" {
     inline = [
-      "sudo apt-get update",
-      "sudo apt-get install -y nginx",
-      "echo 'Hello World' | sudo tee /var/www/html/index.html",
-      "sudo systemctl start nginx"
+      "echo 'Hello World' > /home/adminuser/index.html",
+      "sudo mv /home/adminuser/index.html /var/www/html/"
     ]
   }
 }
 
 # Output the public IP address for accessing the deployed application
 output "public_ip_address" {
-  value = azurerm_public_ip.app_public_ip.ip_address
+  value = azurerm_virtual_machine.app_vm.public_ip_address
 }
