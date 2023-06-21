@@ -76,5 +76,5 @@ resource "azurerm_virtual_machine" "app_vm" {
 
 # Output the public IP address for accessing the deployed application
 output "public_ip_address" {
-  value = azurerm_virtual_machine.app_vm.public_ip_address
+  value = azurerm_network_interface.app_nic.private_ip_address
 }
